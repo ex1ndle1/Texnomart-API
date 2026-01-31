@@ -9,7 +9,7 @@ class UserModel(AbstractUser):
         return self.username
 
 class ProductCategory(models.Model):
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=50 , unique=True)
     
     def __str__(self):
         return self.title
@@ -22,7 +22,6 @@ class ProductModel(models.Model):
         related_name='products'
     )
     price = models.DecimalField(max_digits=8, decimal_places=2)
-
     def __str__(self):
         return self.title
 
