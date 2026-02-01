@@ -8,6 +8,18 @@ class UserAdminPanel(admin.ModelAdmin):
     list_per_page = 5
 
 admin.site.register(models.ProductCategory)
-admin.site.register(models.ProductModel)
-admin.site.register(models.CommentModel)
-admin.site.register(models.UserOrderModel)
+
+@admin.register(models.ProductModel)
+class ProductModelAdminPanel(admin.ModelAdmin):
+    list_per_page  = 50
+
+@admin.register(models.CommentModel)
+class CommentModelAminPanel(admin.ModelAdmin):
+    list_per_page = 50
+
+@admin.register(models.ImageModel)
+class ImageModelAdminPanel(admin.ModelAdmin):
+    list_per_page = 50
+
+
+

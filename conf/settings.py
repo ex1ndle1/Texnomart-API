@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'cloudinary',
      'app', 
     'rest_framework',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     
     
 ]
@@ -175,5 +177,10 @@ AUTH_USER_MODEL = 'app.UserModel'
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-    ]
+    ],
+     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication'
+    ],
+
 }
+

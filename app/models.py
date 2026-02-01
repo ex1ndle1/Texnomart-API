@@ -19,8 +19,11 @@ class ProductModel(models.Model):
     category = models.ForeignKey(
         ProductCategory, 
         on_delete=models.CASCADE, 
-        related_name='products'
-    )
+        related_name='products',
+        null=False ,
+        blank=False
+        
+        )
     price = models.DecimalField(max_digits=8, decimal_places=2)
     def __str__(self):
         return self.title
@@ -31,17 +34,29 @@ class CommentModel(models.Model):
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.CASCADE, 
-        related_name='comments'
+        related_name='comments',
+        null=False ,
+        blank=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
+
+
 class ImageModel(models.Model):
     title = models.CharField(max_length=50)
-    product = models.ForeignKey(ProductModel, on_delete=models.CASCADE, related_name='images')
+    product = models.ForeignKey(ProductModel, on_delete=models.CASCADE, related_name='images',null=False ,blank=True)
     image = models.ImageField(upload_to='images/')
     created_at = models.DateTimeField(auto_now_add=True)
 
+
+
 class UserOrderModel(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,  on_delete=models.CASCADE,         related_name='orders'    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+          on_delete=models.CASCADE,         
+          related_name='orders'  ,
+          null=False ,
+          blank=True  )
+    
     product = models.ForeignKey(ProductModel, on_delete=models.CASCADE, related_name='user_orders')
     created_at = models.DateTimeField(auto_now_add=True)
