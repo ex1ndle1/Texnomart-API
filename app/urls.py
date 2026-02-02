@@ -9,6 +9,7 @@ urlpatterns = [
     path('api/categories/' , views.CategoryAPIView.as_view() , name = 'categories-api_view'),
     path('api/category/detail/<int:id>',views.CategoryDetailView.as_view() ,  name='category_detail_api_view'),
     path('api/products/' ,  views.ProductAPIView.as_view() , name='products_api_view'),
-    path('api/product/detail/<int:id>' , views.ProductDetailAPIView.as_view() ,  name='product_detail_view')
-    
+    path('api/product/detail/<int:id>' , views.ProductDetailAPIView.as_view() ,  name='product_detail_view'),
+    path('api/comments/' , views.CommentModelAPIView.as_view() , name='comment_api_view'),
+    path('api/comment/detail/<int:id>' , views.CommentDetailAPIView.as_view() ,  name='comment_detail_api_view')
 ]
