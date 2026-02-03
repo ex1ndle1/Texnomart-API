@@ -1,14 +1,12 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=django_db
-      - POSTGRES_USER=django_user
-      - POSTGRES_PASSWORD=django_pass
+      - POSTGRES_DB=texnomart
+      - POSTGRES_USER=muza
+      - POSTGRES_PASSWORD=123
 
   redis:
     image: redis:7-alpine
@@ -22,9 +20,8 @@ services:
       - .:/app
     ports:
       - "8000:8000"
-    environment:
-      - DATABASE_URL=postgres://django_user:django_pass@db:5432/django_db
-      - REDIS_URL=redis://redis:6379/1
+    env_file:
+      - .env
     depends_on:
       - db
       - redis
