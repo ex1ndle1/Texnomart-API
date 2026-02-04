@@ -19,7 +19,7 @@ class ProductModel(models.Model):
     category = models.ForeignKey(
         ProductCategory, 
         on_delete=models.CASCADE, 
-        related_name='products',
+        related_name='product',
         null=False ,
         blank=False
         
@@ -60,3 +60,6 @@ class UserOrderModel(models.Model):
     
     product = models.ForeignKey(ProductModel, on_delete=models.CASCADE, related_name='user_orders')
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+

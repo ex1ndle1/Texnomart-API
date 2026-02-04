@@ -15,8 +15,9 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 class UsersAPIView(generics.ListAPIView):
     serializer_class = serializers.UserModelSerializer
     def get_queryset(self):
-        return models.UserModel.objects.all().order_by('id')
+        return models.UserModel.objects.select_related().order_by('id')
 
+print(cache.get_many)
 
 
 class CategoryAPIView(generics.ListCreateAPIView):
@@ -25,7 +26,7 @@ class CategoryAPIView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly ]
     CACHE_KEY=  'categories_cache'
     def get_queryset(self):
-        return models.ProductCategory.objects.select_related('products').all()
+        return models.ProductCategory.objects.prefetch_related('product').all()
     def list(self, request, *args, **kwargs):
         data = cache.get(self.CACHE_KEY)
         if data is None:
@@ -44,7 +45,6 @@ class CategoryDetailView(views.APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     ALL_CATEGORIES_CACHE_KEY =  'categories_cache'
     def delete(self , request , *args , **kwargs ):
-        
         pk= kwargs.get('id')
         CACHE_KEY=  f'category_detail_cache_{pk}'
         category = get_object_or_404(models.ProductCategory ,  pk=pk)
@@ -78,10 +78,7 @@ class CategoryDetailView(views.APIView):
             return Response(serializer.data ,  status.HTTP_200_OK)
         return Response(data , status.HTTP_200_OK)
 
-            
-
-
-class ProductAPIView(views.APIView):
+class ProductAPIView(views.APIView): 
       authentication_classes  = [authentication.BasicAuthentication , authentication.TokenAuthentication , JWTAuthentication ]
       permission_classes = [permissions.IsAuthenticatedOrReadOnly ]
       pagination_class =  CustomPagination
@@ -107,6 +104,12 @@ class ProductAPIView(views.APIView):
 class ProductDetailAPIView(views.APIView):
     authentication_classes =  [authentication.BasicAuthentication , authentication.TokenAuthentication ,  JWTAuthentication ]
     permission_classes = [permissions.IsAuthenticatedOrReadOnly ]
+    
+    def get(self  , request , *args , **kwargs):
+        pk = kwargs.get('id')
+        product = get_object_or_404(models.ProductModel , pk=pk)
+        serializer  = serializers.ProductModelSerializer(product)
+        return Response(serializer.data , status.HTTP_200_OK)
 
     def patch(self , request , *args , **kwargs):  
         pk  = kwargs.get('id')
@@ -125,13 +128,9 @@ class ProductDetailAPIView(views.APIView):
         return Response('successfully deleted' ,  status.HTTP_200_OK)
 
 
-
-
-
 class CommentModelAPIView(views.APIView):
     authentication_classes =  [authentication.BasicAuthentication , authentication.TokenAuthentication ,  JWTAuthentication ]
     permission_classes = [permissions.IsAuthenticatedOrReadOnly ]
-
     pagination_class = CustomPagination
     def get(self , request  , *args ,  **kwargs):
           
@@ -172,4 +171,47 @@ class CommentDetailAPIView(views.APIView):
         comment.delete()
         return Response('successfully deleted' ,  status.HTTP_202_ACCEPTED)
     
+
+
+class ImageAPIView(views.APIView):
+     def get(self , request , *args  , **kwrags ):
+         serializer  = serializers.ImageModelSerializer()
+         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

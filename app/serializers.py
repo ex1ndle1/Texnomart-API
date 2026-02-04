@@ -23,9 +23,14 @@ class ProductModelSerializer(serializers.ModelSerializer):
         fields = ('id' , 'title' , 'price'  , 'category')
     
 class CategoryModelSerializer(serializers.ModelSerializer):
-    products = ProductModelSerializer(many=True,read_only = True)
+    product = ProductModelSerializer(many=True,read_only = True)
     class Meta:
         model  = models.ProductCategory
-        fields = ('id','title' , 'products' )
+        fields = ('id','title' , 'product' )
 
 
+class ImageModelSerializer(serializers.ModelSerializer):
+    product = ProductModelSerializer(many=True, read_only= True)
+    class Meta:
+        model  = models.ImageModel
+        fields = ('id' , 'title' , 'image' , 'created_at', 'product' )

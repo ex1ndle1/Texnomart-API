@@ -91,7 +91,7 @@ DATABASES = {
         'NAME': 'texnomart',
         'USER': 'muza',
         'PASSWORD': '123',
-        'HOST': 'db',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
