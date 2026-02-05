@@ -28,6 +28,7 @@ class CategoryAPIView(generics.ListCreateAPIView):
     def get_queryset(self):
         return models.ProductCategory.objects.prefetch_related('product').all()
     def list(self, request, *args, **kwargs):
+    
         data = cache.get(self.CACHE_KEY)
         if data is None:
             response = super().list(request, *args, **kwargs)
@@ -51,12 +52,12 @@ class CategoryDetailView(views.APIView):
         category.delete()
         cache.delete(CACHE_KEY)
         cache.delete(self.ALL_CATEGORIES_CACHE_KEY)
-        return Response('successfully deleted' , status.HTTP_404_NOT_FOUND) 
+        return Response('successfully deleted' , status.HTTP_204_NO_CONTENT) 
 
 
     def patch(self , request , *args , **kwargs):
         pk= kwargs.get('id')
-        CACHE_KEY = f'category_detail_cache_{pk}'
+        CACHE_KEY=  f'category_detail_cache_{pk}'
         category = get_object_or_404(models.ProductCategory ,pk=pk)
         serializer = serializers.CategoryModelSerializer(instance=category  , partial = True ,  data=request.data)
         if serializer.is_valid():
@@ -72,7 +73,7 @@ class CategoryDetailView(views.APIView):
         cache_key = f'category_detail_cache_{pk}'
         data = cache.get(cache_key  )
         if data is None:
-            category = get_object_or_404(models.ProductCategory.objects.prefetch_related('products').all().order_by('id')  , pk=pk)
+            category = get_object_or_404(models.ProductCategory.objects.prefetch_related('product').all().order_by('id')  , pk=pk)
             serializer = serializers.CategoryModelSerializer(category)
             cache.set(cache_key , serializer.data , 120 )
             return Response(serializer.data ,  status.HTTP_200_OK)
@@ -102,7 +103,7 @@ class ProductAPIView(views.APIView):
           return Response(serializer.errors , status=status.HTTP_400_BAD_REQUEST)
 
 class ProductDetailAPIView(views.APIView):
-    authentication_classes =  [authentication.BasicAuthentication , authentication.TokenAuthentication ,  JWTAuthentication ]
+    authentication_classes =  [authentication.BasicAuthentication , authentication.TokenAuthentication ,  JWTAuthentication , authentication.SessionAuthentication]
     permission_classes = [permissions.IsAuthenticatedOrReadOnly ]
     
     def get(self  , request , *args , **kwargs):
@@ -125,11 +126,11 @@ class ProductDetailAPIView(views.APIView):
         pk = kwargs.get('id')
         product = get_object_or_404(models.ProductModel ,  pk=pk)
         product.delete()
-        return Response('successfully deleted' ,  status.HTTP_200_OK)
+        return Response('successfully deleted' ,  status.HTTP_204_NO_CONTENT)
 
 
 class CommentModelAPIView(views.APIView):
-    authentication_classes =  [authentication.BasicAuthentication , authentication.TokenAuthentication ,  JWTAuthentication ]
+    authentication_classes =  [authentication.BasicAuthentication , authentication.TokenAuthentication ,  JWTAuthentication ,authentication.SessionAuthentication ]
     permission_classes = [permissions.IsAuthenticatedOrReadOnly ]
     pagination_class = CustomPagination
     def get(self , request  , *args ,  **kwargs):
@@ -155,6 +156,8 @@ class CommentModelAPIView(views.APIView):
     
 
 class CommentDetailAPIView(views.APIView):
+    authentication_classes =  [authentication.BasicAuthentication , authentication.TokenAuthentication ,  JWTAuthentication ,authentication.SessionAuthentication ]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly ]
     def patch(self,request , *args , **kwargs):
         pk = kwargs.get('id')
         comment = get_object_or_404(models.CommentModel  , pk=pk)
@@ -169,14 +172,34 @@ class CommentDetailAPIView(views.APIView):
         pk = kwargs.get('id')
         comment  = get_object_or_404(models.CommentModel , pk=pk)
         comment.delete()
-        return Response('successfully deleted' ,  status.HTTP_202_ACCEPTED)
+        return Response('successfully deleted' ,  status.HTTP_204_NO_CONTENT)
     
 
 
 class ImageAPIView(views.APIView):
-     def get(self , request , *args  , **kwrags ):
-         serializer  = serializers.ImageModelSerializer()
+    authentication_classes =  [authentication.BasicAuthentication , authentication.TokenAuthentication ,  JWTAuthentication, authentication.SessionAuthentication ]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly ]
+    pagination_class = CustomPagination
+    def get(self , request , *args  , **kwrags ):
+         images = models.ImageModel.objects.all()
+         paginator =self.pagination_class()
+         page = paginator.paginate_queryset(images , request=request)
          
+         if page is not None:
+             serializer  = serializers.ImageModelSerializer(page , many = True)
+             return Response(serializer.data ,  status.HTTP_200_OK)
+         
+         serializer  = serializers.ImageModelSerializer(instance=images , many=True)
+
+         return Response(serializer.data ,  status.HTTP_200_OK)
+    
+    def post(self , request , *args , **kwargs):
+        serializer = serializers.ImageModelSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response('successfully created' , status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors , status.HTTP_204_NO_CONTENT)
 
 
 
@@ -185,33 +208,57 @@ class ImageAPIView(views.APIView):
 
 
 
+class ImageDetailAPIView(views.APIView):
+    authentication_classes = [authentication.BasicAuthentication, authentication.TokenAuthentication, JWTAuthentication , authentication.SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    def get(self, request, id):
+        image = get_object_or_404(models.ImageModel, id=id)
+        serializer = serializers.ImageModelSerializer(image)
+        return Response(serializer.data)
+
+    def delete(self, request, id):
+        image = get_object_or_404(models.ImageModel, id=id)
+        image.delete()
+        return Response('successfully deleted', status=status.HTTP_204_NO_CONTENT)
+   
 
 
 
 
+class UserOrderAPIView(views.APIView):
+    authentication_classes = [authentication.BasicAuthentication, authentication.TokenAuthentication, JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = CustomPagination
+    def get(self, request, *args, **kwargs):
+        orders = models.UserOrderModel.objects.filter(user=request.user)
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(orders, request=request)
+        if page is not None:
+            serializer = serializers.UserOrderModelSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+        serializer = serializers.UserOrderModelSerializer(orders, many=True)
+        return Response(serializer.data)
 
+    def post(self, request, *args, **kwargs):
+        serializer = serializers.UserOrderModelSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response('order created', status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class UserOrderDetailAPIView(views.APIView):
+    authentication_classes = [authentication.BasicAuthentication, authentication.TokenAuthentication, JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    def get(self, request, *args , **kwargs):
+        pk = kwargs.get('id')
+        order = get_object_or_404(models.UserOrderModel,pk=pk)
+        serializer = serializers.UserOrderModelSerializer(order)
+        return Response(serializer.data)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    def delete(self, request, id):
+        order = get_object_or_404(models.UserOrderModel, id=id, user=request.user)
+        order.delete()
+        return Response('order cancelled', status=status.HTTP_204_NO_CONTENT)
 
 
 

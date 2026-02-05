@@ -18,6 +18,7 @@ class CommentModelSerializer(serializers.ModelSerializer):
 
 
 class ProductModelSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = models.ProductModel
         fields = ('id' , 'title' , 'price'  , 'category')
@@ -30,7 +31,16 @@ class CategoryModelSerializer(serializers.ModelSerializer):
 
 
 class ImageModelSerializer(serializers.ModelSerializer):
-    product = ProductModelSerializer(many=True, read_only= True)
+    product = ProductModelSerializer( read_only= True)
     class Meta:
         model  = models.ImageModel
         fields = ('id' , 'title' , 'image' , 'created_at', 'product' )
+
+
+class UserOrderModelSerializer(serializers.ModelSerializer):
+    product_details = ProductModelSerializer(source='product', read_only=True)
+    user = serializers.ReadOnlyField(source='user.username')
+    class Meta:
+        model = models.UserOrderModel
+        fields = ('id', 'user', 'product', 'product_details', 'created_at')
+       

@@ -6,10 +6,14 @@ from . import views
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls') ,  name='rest'),
     path('api/users/' , views.UsersAPIView.as_view() ,  name='users_api_view'),
-    path('api/categories/' , views.CategoryAPIView.as_view() , name = 'categories-api_view'),
+    path('api/categories/' , views.CategoryAPIView.as_view() , name = 'categories_api_view'),
     path('api/category/detail/<int:id>',views.CategoryDetailView.as_view() ,  name='category_detail_api_view'),
     path('api/products/' ,  views.ProductAPIView.as_view() , name='products_api_view'),
-    path('api/product/detail/<int:id>' , views.ProductDetailAPIView.as_view() ,  name='product_detail_view'),
+    path('api/product/detail/<int:id>' , views.ProductDetailAPIView.as_view() ,  name='product_detail_api_view'),
     path('api/comments/' , views.CommentModelAPIView.as_view() , name='comment_api_view'),
-    path('api/comment/detail/<int:id>' , views.CommentDetailAPIView.as_view() ,  name='comment_detail_api_view')
+    path('api/comment/detail/<int:id>' , views.CommentDetailAPIView.as_view() ,  name='comment_detail_api_view'),
+    path('api/images/' , views.ImageAPIView.as_view() , name='images_api_view'),
+    path('api/image/detail/<idnt:id>' , views.ImageDetailAPIView.as_view() , name='image_detail_view'),
+    path('api/orders/' , views.UserOrderAPIView.as_view() , name='orders_api_view'),
+    path('api/order/detail/<int:id>' , views.UserOrderDetailAPIView.as_view() , name='order_detail_view')
 ]
