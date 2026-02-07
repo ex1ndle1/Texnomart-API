@@ -47,3 +47,42 @@ class ProductAPIDetailTest(TestCase):
         self.assertEqual(response.status_code , status.HTTP_204_NO_CONTENT)
 
     
+class CommentsAPITest(TestCase):
+    def setUp(self):
+        self.user = models.UserModel.objects.create(username = 'muza'  , password = '123')
+        self.category  = models.ProductCategory.objects.create(title='phones')
+        self.product = models.ProductModel.objects.create(title='iphonus' , category=self.category, price=1233)
+        self.comment  = models.CommentModel.objects.create(text = 'cool' , product =self.product , author  = self.user)
+        self.url  = reverse('comments_api_view')
+    
+    def test_get(self):
+        response  = self.client.get(self.url)
+        self.assertEqual(response.status_code , status.HTTP_200_OK)
+
+
+    def test_post(self):
+        self.client.force_login(user=self.user)
+        response = self.client.post(self.url , data={'text':'cool' , 'author':self.user.id , 'product':self.product.pk})
+        print(f'errror : {response.data}')
+        self.assertEqual(response.status_code ,   status.HTTP_201_CREATED)
+
+
+
+class JWTTest(TestCase):
+    def setUp(self):
+        self.user = models.UserModel.objects.create(username = 'muza'  , password = '123')
+        self.get_token = reverse('token_obtain_pair')
+
+
+    def test_get_access_token(self):
+        response  = self.client.post(self.get_token  ,  data={'username':'muza' ,  'password':'123'})
+        print(f'data : {response.data}')
+        self.assertEqual(response.status_code , status.HTTP_200_OK)
+
+
+
+
+
+
+
+    
