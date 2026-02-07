@@ -49,7 +49,7 @@ class ProductAPIDetailTest(TestCase):
     
 class CommentsAPITest(TestCase):
     def setUp(self):
-        self.user = models.UserModel.objects.create(username = 'muza'  , password = '123')
+        self.user = models.UserModel.objects.create_user(username = 'muza'  , password = '123')
         self.category  = models.ProductCategory.objects.create(title='phones')
         self.product = models.ProductModel.objects.create(title='iphonus' , category=self.category, price=1233)
         self.comment  = models.CommentModel.objects.create(text = 'cool' , product =self.product , author  = self.user)
@@ -70,13 +70,13 @@ class CommentsAPITest(TestCase):
 
 class JWTTest(TestCase):
     def setUp(self):
-        self.user = models.UserModel.objects.create(username = 'muza'  , password = '123')
+        self.user = models.UserModel.objects.create_user(username = 'muza'  , password = '123')
         self.get_token = reverse('token_obtain_pair')
 
 
     def test_get_access_token(self):
-        response  = self.client.post(self.get_token  ,  data={'username':'muza' ,  'password':'123'})
-        print(f'data : {response.data}')
+        response  = self.client.post(self.get_token  ,  data={'username':'muza' ,  'password':'123'}  ,  format='json')
+        print(response.data['refresh'])
         self.assertEqual(response.status_code , status.HTTP_200_OK)
 
 
